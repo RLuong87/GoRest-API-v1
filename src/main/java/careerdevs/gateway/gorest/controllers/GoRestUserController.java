@@ -28,7 +28,6 @@ public class GoRestUserController {
         try {
 
             HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", "Bearer 14df59a45c1848d03013a93a010853a9e632fd8d4cf773b6aa8053e894f34ce2");
 
             HttpEntity request = new HttpEntity(headers);
 
