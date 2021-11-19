@@ -70,11 +70,6 @@ public class GoRestUserController {
         }
     }
 
-//    @PutMapping("/put/{id}")
-//    public ResponseEntity<GoRestUsers> updateUser(
-//
-//    }
-
     @PutMapping("/put")
     public Object updateUsers(
             RestTemplate restTemplate,
