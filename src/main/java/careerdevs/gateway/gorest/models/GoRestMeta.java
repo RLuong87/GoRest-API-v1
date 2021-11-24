@@ -4,13 +4,6 @@ public class GoRestMeta {
 
     private Pagination pagination;
 
-    public GoRestMeta(Pagination pagination) {
-        this.pagination = pagination;
-    }
-
-    public GoRestMeta() {
-    }
-
     public void setPagination(Pagination pagination) {
         this.pagination = pagination;
     }
