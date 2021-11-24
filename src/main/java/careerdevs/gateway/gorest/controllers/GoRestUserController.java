@@ -9,6 +9,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import java.util.ArrayList;
+import java.util.Collections;
 
 @RestController
 @RequestMapping("/api/gorest/user")
@@ -17,35 +19,55 @@ public class GoRestUserController {
     @Autowired
     private Environment env;
 
+    private static final String GURL = "https://gorest.co.in/public/v1/users";
+
     @GetMapping("/pageone")
-    public Object pageOne(RestTemplate restTemplate) {
-        return restTemplate.getForObject("https://gorest.co.in/public/v1/users/", Object.class);
+    public GoRestResponseMulti pageOne(RestTemplate restTemplate) {
+        return restTemplate.getForObject(GURL, GoRestResponseMulti.class);
     }
 
 
-//    @GetMapping("/allusers")
-//    public Object allUsers(RestTemplate restTemplate) {
-//
-//        GoRestResponseMulti res = pageOne(restTemplate);
-//        int pageLimit = res.getMeta().getPagination().getPages();
-//
-//        ArrayList<GoRestUser> allUsers = new ArrayList<>();
+    @GetMapping("/allusers")
+    public Object allUsers(RestTemplate restTemplate) {
+
+        GoRestResponseMulti res = pageOne(restTemplate);
+        int pageLimit = res.getMeta().getPagination().getPages();
+
+        ArrayList<GoRestUser> allUsers = new ArrayList<>();
 //        Collections.addAll(allUsers, res.getData());
-//
-//        for (int i = 2; i <= pageLimit; i++) {
-//
-//        }
-//
-//        return "null";
-//    }
+
+        for (int i = 2; i <= pageLimit; i++) {
+            String URL = "https://gorest.co.in/public/v1/users?page=" + i;
+            GoRestUser[] userData = restTemplate.getForObject(URL, GoRestResponseMulti.class).getData();
+            Collections.addAll(allUsers, userData);
+        }
+        return allUsers;
+    }
+
+
+    @GetMapping("/someusers")
+    public Object someUsers(RestTemplate restTemplate) {
+
+        GoRestResponseMulti res = pageOne(restTemplate);
+        int pageLimit = res.getMeta().getPagination().getPages();
+
+        ArrayList<GoRestUser> allUsers = new ArrayList<>();
+
+        for (int i = 1; i <= 3; i++) {
+            String URL = "https://gorest.co.in/public/v1/users?page=" + i;
+            GoRestUser[] userData = restTemplate.getForObject(URL, GoRestResponseMulti.class).getData();
+            Collections.addAll(allUsers, userData);
+        }
+        return allUsers;
+    }
 
 
     @GetMapping("/get")
     public Object getUser(RestTemplate restTemplate, @RequestParam(name = "id") String id) {
-        String URL = "https://gorest.co.in/public/v1/users/" + id;
+        String URL = GURL + id;
         try {
 
-            return restTemplate.getForObject(URL, GoRestResponse.class).getData();
+            return restTemplate.getForObject(URL, GoRestResponseMulti.class).getData();
 
         } catch (HttpClientErrorException.NotFound e) {
 
@@ -65,11 +87,8 @@ public class GoRestUserController {
         String URL = "https://gorest.co.in/public/v1/users?page=" + page;
 
         try {
-
-            return restTemplate.getForObject(URL, Object.class);
-
+            return restTemplate.getForObject(URL, GoRestResponseMulti.class).getData();
         } catch (Exception e) {
-
             return "Page does not exist";
         }
     }
@@ -81,7 +100,6 @@ public class GoRestUserController {
             RestTemplate restTemplate,
             @RequestBody GoRestUser user
     ) {
-        String URL = "https://gorest.co.in/public/v1/users/";
         try {
 
             if (!user.getGender().equals("male") && !user.getGender().equals("female")) {
@@ -97,7 +115,7 @@ public class GoRestUserController {
 
             HttpEntity<GoRestUser> request = new HttpEntity(user, headers);
 
-            return restTemplate.exchange(URL, HttpMethod.POST, request, GoRestResponse.class);
+            return restTemplate.exchange(GURL, HttpMethod.POST, request, GoRestResponse.class);
 
         } catch (Exception e) {
             System.out.println(e.getClass());
@@ -122,7 +140,7 @@ public class GoRestUserController {
             @RequestParam(name = "gender") String gender,
             @RequestParam(name = "status") String status
     ) {
-        String URL = "https://gorest.co.in/public/v1/users/";
+
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(env.getProperty("gorest.token"));
@@ -131,7 +149,7 @@ public class GoRestUserController {
 
             HttpEntity<GoRestUser> request = new HttpEntity(newUser, headers);
 
-            return restTemplate.exchange(URL, HttpMethod.POST, request, GoRestResponse.class);
+            return restTemplate.exchange(GURL, HttpMethod.POST, request, GoRestResponse.class);
 
         } catch (Exception e) {
             System.out.println(e.getClass());
@@ -151,7 +169,7 @@ public class GoRestUserController {
             @RequestParam(name = "gender") String gender,
             @RequestParam(name = "status") String status
     ) {
-        String URL = "https://gorest.co.in/public/v1/users/" + id;
+        String URL = GURL + id;
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(env.getProperty("gorest.token"));
@@ -184,7 +202,7 @@ public class GoRestUserController {
             @RequestParam(name = "gender") String gender,
             @RequestParam(name = "status") String status
     ) {
-        String URL = "https://gorest.co.in/public/v1/users/" + id;
+        String URL = GURL + id;
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(env.getProperty("gorest.token"));
@@ -206,7 +224,7 @@ public class GoRestUserController {
     @DeleteMapping("/delete")
     public Object deleteUser(RestTemplate restTemplate, @RequestParam(name = "id") String id) {
 
-        String URL = "https://gorest.co.in/public/v1/users/" + id;
+        String URL = GURL + id;
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(env.getProperty("gorest.token"));
