@@ -1,5 +1,8 @@
 package careerdevs.gateway.gorest.models;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class GoRestUsers {
     private String name;
     private String email;

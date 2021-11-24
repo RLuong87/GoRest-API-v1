@@ -1,15 +1,11 @@
 package careerdevs.gateway.gorest.controllers;
 
-import careerdevs.gateway.gorest.models.GoRestResponse;
-import careerdevs.gateway.gorest.models.GoRestUsers;
-import careerdevs.gateway.gorest.models.UpdatedUsers;
+import careerdevs.gateway.gorest.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -19,12 +15,30 @@ import org.springframework.web.client.RestTemplate;
 public class GoRestUserController {
 
     @Autowired
-    Environment env;
+    private Environment env;
 
     @GetMapping("/pageone")
-    public Object allUser(RestTemplate restTemplate) {
-        return restTemplate.getForObject("https://gorest.co.in/public/v1/users/", GoRestResponse.class).getData();
+    public Object pageOne(RestTemplate restTemplate) {
+        return restTemplate.getForObject("https://gorest.co.in/public/v1/users/", Object.class);
     }
+
+
+//    @GetMapping("/allusers")
+//    public Object allUsers(RestTemplate restTemplate) {
+//
+//        GoRestResponseMulti res = pageOne(restTemplate);
+//        int pageLimit = res.getMeta().getPagination().getPages();
+//
+//        ArrayList<GoRestUser> allUsers = new ArrayList<>();
+//        Collections.addAll(allUsers, res.getData());
+//
+//        for (int i = 2; i <= pageLimit; i++) {
+//
+//        }
+//
+//        return "null";
+//    }
+
 
     @GetMapping("/get")
     public Object getUser(RestTemplate restTemplate, @RequestParam(name = "id") String id) {
@@ -44,6 +58,61 @@ public class GoRestUserController {
         }
     }
 
+
+    @GetMapping("/page/{page}")
+    public Object getPage(RestTemplate restTemplate, @PathVariable(name = "page") String page) {
+        String URL = "https://gorest.co.in/public/v1/users?page=" + page;
+
+        try {
+
+            return restTemplate.getForObject(URL, Object.class);
+
+        } catch (Exception e) {
+
+            return "Page does not exist";
+        }
+    }
+
+
+    // Post Method V2
+    @PostMapping("/post/v2")
+    public Object postUserv2(
+            RestTemplate restTemplate,
+            @RequestBody GoRestUser user
+    ) {
+        String URL = "https://gorest.co.in/public/v1/users/";
+        try {
+
+            if (!user.getGender().equals("male") && !user.getGender().equals("female")) {
+                return "Gender must be entered as male or female";
+            }
+
+            if (!user.getStatus().equals("inactive") && !user.getStatus().equals("active")) {
+                return "Status must be entered as active or inactive";
+            }
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(env.getProperty("gorest.token"));
+
+            HttpEntity<GoRestUser> request = new HttpEntity(user, headers);
+
+            return restTemplate.exchange(URL, HttpMethod.POST, request, GoRestResponse.class);
+
+        } catch (Exception e) {
+            System.out.println(e.getClass());
+            System.out.println(e.getMessage());
+            return e.getMessage();
+        }
+    }
+
+
+    @GetMapping("/test")
+    public Object test(@RequestBody Object testObj) {
+        return testObj;
+    }
+
+
+    // Post Method V1
     @PostMapping("/post")
     public Object postUser(
             RestTemplate restTemplate,
@@ -57,9 +126,9 @@ public class GoRestUserController {
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(env.getProperty("gorest.token"));
 
-            GoRestUsers newUser = new GoRestUsers(name, email, gender, status);
+            GoRestUser newUser = new GoRestUser(name, email, gender, status);
 
-            HttpEntity<GoRestUsers> request = new HttpEntity(newUser, headers);
+            HttpEntity<GoRestUser> request = new HttpEntity(newUser, headers);
 
             return restTemplate.exchange(URL, HttpMethod.POST, request, GoRestResponse.class);
 
@@ -70,14 +139,16 @@ public class GoRestUserController {
         }
     }
 
-    @PutMapping("/put")
-    public Object updateUsers(
+
+    // Put Method v1
+    @PutMapping("/put/v1")
+    public Object updateUsers1(
             RestTemplate restTemplate,
             @RequestParam(name = "id") String id,
             @RequestParam(name = "name") String name,
             @RequestParam(name = "email") String email,
-            @RequestParam (name = "gender") String gender,
-            @RequestParam (name = "status") String status
+            @RequestParam(name = "gender") String gender,
+            @RequestParam(name = "status") String status
     ) {
         String URL = "https://gorest.co.in/public/v1/users/" + id;
         try {
@@ -90,7 +161,7 @@ public class GoRestUserController {
             updateUser.setGender(gender);
             updateUser.setStatus(status);
 
-            HttpEntity<GoRestUsers> request = new HttpEntity(updateUser, headers);
+            HttpEntity<GoRestUser> request = new HttpEntity(updateUser, headers);
 
             return restTemplate.exchange(URL, HttpMethod.PUT, request, GoRestResponse.class);
 
@@ -101,12 +172,41 @@ public class GoRestUserController {
         }
     }
 
+
+    // Put Method v2
+    @PutMapping("/put/v2/{id}")
+    public Object updateUsers2(
+            RestTemplate restTemplate,
+            @PathVariable(name = "id") String id,
+            @RequestParam(name = "name") String name,
+            @RequestParam(name = "email") String email,
+            @RequestParam(name = "gender") String gender,
+            @RequestParam(name = "status") String status
+    ) {
+        String URL = "https://gorest.co.in/public/v1/users/" + id;
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(env.getProperty("gorest.token"));
+
+            GoRestUser newUser = new GoRestUser(name, email, gender, status);
+
+            HttpEntity<GoRestUser> request = new HttpEntity(newUser, headers);
+
+            return restTemplate.exchange(URL, HttpMethod.PUT, request, GoRestResponse.class);
+
+        } catch (Exception e) {
+            System.out.println(e.getClass());
+            System.out.println(e.getMessage());
+            return e.getMessage();
+        }
+    }
+
+
     @DeleteMapping("/delete")
     public Object deleteUser(RestTemplate restTemplate, @RequestParam(name = "id") String id) {
 
         String URL = "https://gorest.co.in/public/v1/users/" + id;
         try {
-
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(env.getProperty("gorest.token"));
 
