@@ -2,22 +2,22 @@ package careerdevs.gateway.gorest.models;
 
 public class GoRestResponse {
 
-    private Object meta;
-    private Object data;
+    private GoRestMeta meta;
+    private GoRestUser data;
 
-    public Object getMeta() {
+    public GoRestMeta getMeta() {
         return meta;
     }
 
-    public void setMeta(Object meta) {
+    public void setMeta(GoRestMeta meta) {
         this.meta = meta;
     }
 
-    public Object getData() {
+    public GoRestUser getData() {
         return data;
     }
 
-    public void setData(Object data) {
+    public void setData(GoRestUser data) {
         this.data = data;
     }
 }

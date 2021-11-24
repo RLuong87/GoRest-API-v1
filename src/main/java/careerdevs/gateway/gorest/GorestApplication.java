@@ -17,6 +17,4 @@ public class GorestApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(GorestApplication.class, args);
 	}
-
-
 }

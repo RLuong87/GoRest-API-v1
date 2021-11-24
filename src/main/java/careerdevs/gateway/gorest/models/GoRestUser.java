@@ -3,20 +3,29 @@ package careerdevs.gateway.gorest.models;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class GoRestUsers {
+public class GoRestUser {
+    private String id;
     private String name;
     private String email;
     private String gender;
     private String status;
 
-    public GoRestUsers(String name,
-                       String email,
-                       String gender,
-                       String status) {
+    public GoRestUser(String name, String email, String gender, String status) {
         this.name = name;
         this.email = email;
         this.gender = gender;
         this.status = status;
+    }
+
+    public GoRestUser() {
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getName() {
