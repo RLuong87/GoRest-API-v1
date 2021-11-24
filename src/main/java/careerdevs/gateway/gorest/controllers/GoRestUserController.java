@@ -61,6 +61,7 @@ public class GoRestUserController {
 
     @GetMapping("/page/{page}")
     public Object getPage(RestTemplate restTemplate, @PathVariable(name = "page") String page) {
+
         String URL = "https://gorest.co.in/public/v1/users?page=" + page;
 
         try {
